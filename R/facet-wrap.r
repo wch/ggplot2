@@ -52,7 +52,9 @@
 #' p + geom_point(data = transform(cyl6, cyl = NULL), colour = "red") + 
 #'   facet_wrap(~ cyl)
 #' }
-facet_wrap <- function(facets, nrow = NULL, ncol = NULL, scales = "fixed", shrink = TRUE, as.table = TRUE, drop = TRUE) {
+facet_wrap <- function(facets, nrow = NULL, ncol = NULL, scales = "fixed",
+                       shrink = TRUE, labeller = "label_value", as.table = TRUE, drop = TRUE) {
+  
   scales <- match.arg(scales, c("fixed", "free_x", "free_y", "free"))
   free <- list(
     x = any(scales %in% c("free_x", "free")),
@@ -62,15 +64,16 @@ facet_wrap <- function(facets, nrow = NULL, ncol = NULL, scales = "fixed", shrin
   facet(
     facets = as.quoted(facets), free = free, shrink = shrink,
     as.table = as.table, drop = drop,
-    ncol = ncol, nrow = nrow, 
+    ncol = ncol, nrow = nrow, labeller = labeller,
     subclass = "wrap"
   )
 }
 
+
 #' @S3method facet_train_layout wrap
 facet_train_layout.wrap <- function(facet, data) { 
   panels <- layout_wrap(data, facet$facets, facet$nrow, facet$ncol,
-     facet$as.table, facet$drop)
+                        facet$as.table, facet$drop)
   
   n <- nrow(panels)
   nrow <- max(panels$ROW)
@@ -119,13 +122,13 @@ facet_render.wrap <- function(facet, panel, coord, theme, geom_grobs) {
   ncol <- max(layout$COL)
   nrow <- max(layout$ROW)
   n <- nrow(layout)
-
+  
   panels <- facet_panels(facet, panel, coord, theme, geom_grobs)
   axes <- facet_axes(facet, panel, coord, theme)
   strips <- facet_strips(facet, panel, theme)
-
+  
   # Should become facet_arrange_grobs
-
+  
   # Locate each element in panel
   find_pos <- function(layout, loc, size) {
     n <- nrow(layout)
@@ -168,17 +171,17 @@ facet_render.wrap <- function(facet, panel, coord, theme, geom_grobs) {
   
   col_widths <- compute_grob_widths(info, widths)
   row_heights <- compute_grob_heights(info, heights)
-
+  
   # Create the gtable for the legend
   gt <- gtable(widths = col_widths, heights = row_heights, respect = respect)
-
+  
   # Keep only the rows in info that refer to grobs
   info  <- info[info$type %in% names(grobs), ]
   grobs <- unlist(grobs, recursive = FALSE)
   # Add the grobs
   gt <- gtable_add_grob(gt, grobs, l = info$l, t = info$t, r = info$r,
-    b = info$b, name = info$name, clip = info$clip)
-
+                        b = info$b, name = info$name, clip = info$clip)
+  
   gt
 }
 
@@ -193,17 +196,33 @@ facet_panels.wrap <- function(facet, panel, coord, theme, geom_grobs) {
     panel_grobs <- c(list(bg), geom_grobs, list(fg))
     
     ggname(paste("panel", i, sep = "-"), 
-      gTree(children = do.call("gList", panel_grobs)))
+           gTree(children = do.call("gList", panel_grobs)))
   })
 }
 
 #' @S3method facet_strips wrap
 facet_strips.wrap <- function(facet, panel, theme) {
-  labels_df <- panel$layout[names(facet$facets)]
-  labels_df[] <- llply(labels_df, format, justify = "none")
+  labeller <- match.fun(facet$labeller)
   
-  labels <- apply(labels_df, 1, paste, collapse=", ")
+  labels_df <- panel$layout[names(facet$facets)]
+  
+  # If faceting with multiple variables, paste them together
+  # Use "," as collapser if labeller is label_value or label_both 
+  # and "*" if it's any other
+  # because plotmath fails when there's a comma inside the expression
 
+  if(identical(labeller, label_value)|identical(labeller, label_both)){
+    collapser  <- ","
+  } else {
+    collapser  <- "*"
+  }
+
+  labels <- apply(labels_df, 1, paste, collapse= collapser)
+  varnames <- paste(names(labels_df), collapse=", ")
+  
+  # Run the labeller function
+  labels <- labeller(varnames, labels)
+  
   list(t = llply(labels, ggstrip, theme = theme))
 }
 
