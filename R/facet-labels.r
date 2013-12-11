@@ -9,7 +9,7 @@
 #' p <- qplot(wt, mpg, data = mtcars)
 #' p + facet_grid(. ~ cyl)
 #' p + facet_grid(. ~ cyl, labeller = label_value)
-label_value <- function(variable, value) as.character(value)
+label_value <- function(variable, value) if (is.null(value)) NULL else as.character(value)
 
 #' Label facets with value and variable.
 #' 
@@ -21,7 +21,36 @@ label_value <- function(variable, value) as.character(value)
 #' p <- qplot(wt, mpg, data = mtcars)
 #' p + facet_grid(. ~ cyl)
 #' p + facet_grid(. ~ cyl, labeller = label_both)
-label_both <- function(variable, value) paste(variable, value, sep = ": ")
+label_both <- function(variable, value) if (is.null(value)) NULL else paste(variable, value, sep = ": ")
+
+#' Label facets with value, supply an additional facet header.
+#' 
+#' @param variable variable name passed in by facetter
+#' @param value variable value passed in by facetter
+#' @family facet labellers
+#' @export
+#' @examples
+#' p <- qplot(wt, mpg, data = mtcars)
+#' p + facet_grid(. ~ cyl)
+#' p + facet_grid(. ~ cyl, labeller = label_title)
+label_title <- function(variable, value) if (is.null(value)) as.character(variable) else as.character(value)
+
+#' Constructs a function that labels facets with value, supply an additional
+#' facet header where the values are determined by looking up in a list.
+#' Returns a function similar to \link{label_title}.
+#' 
+#' @param dict List with data columns as names and title texts as values
+#' @family facet labellers
+#' @export
+#' @examples
+#' p <- qplot(wt, mpg, data = mtcars)
+#' p + facet_grid(. ~ cyl)
+#' p + facet_grid(. ~ cyl, labeller = label_title_dict(list(cyl="Cylinders")))
+label_title_dict <- function(dict) {
+  force(dict)
+  function(variable, value)
+    if (is.null(value)) dict[[as.character(variable)]] else as.character(value)
+}
 
 #' Label facets with parsed label.
 #' 
@@ -36,7 +65,7 @@ label_both <- function(variable, value) paste(variable, value, sep = ": ")
 #' qplot(wt, mpg, data = mtcars) + facet_grid(. ~ cyl2, 
 #'   labeller = label_parsed)
 label_parsed <- function(variable, value) {
-  llply(as.character(value), function(x) parse(text = x))
+  if (is.null(value)) NULL else llply(as.character(value), function(x) parse(text = x))
 }
 
 #' Label facet with 'bquoted' expressions
