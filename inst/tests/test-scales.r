@@ -1,5 +1,4 @@
 context("Scales")
-library(scales)
 
 test_that("buidling a plot does not affect its scales", {
   dat <- data.frame(x = rnorm(20), y = rnorm(20))
@@ -99,15 +98,18 @@ test_that("position scales generate after stats", {
 test_that("oob affects position values", {
   dat <- data.frame(x=c("a", "b", "c"), y=c(1, 5, 10))
   base <- ggplot(dat, aes(x=x, y=y)) + 
-    geom_bar() + 
+    geom_bar(stat="identity") +
     annotate("point", x = "a", y = c(-Inf, Inf))
 
   y_scale <- function(limits, oob = censor) {
     scale_y_continuous(limits = limits, oob = oob, expand = c(0, 0))
   }
+  base + scale_y_continuous(limits=c(-0,5))
 
-  low_censor <- cdata(base + y_scale(c(0, 5), censor))
-  mid_censor <- cdata(base + y_scale(c(3, 7), censor))
+  expect_warning(low_censor <- cdata(base + y_scale(c(0, 5), censor)),
+    "Removed 1 rows containing missing values")
+  expect_warning(mid_censor <- cdata(base + y_scale(c(3, 7), censor)),
+    "Removed 2 rows containing missing values")
 
   low_squish <- cdata(base + y_scale(c(0, 5), squish))
   mid_squish <- cdata(base + y_scale(c(3, 7), squish))
@@ -146,4 +148,23 @@ test_that("scales looked for in appropriate place", {
   rm(scale_x_continuous)
   p4 <- qplot(mpg, wt, data = mtcars)
   expect_equal(xlabel(p4), NULL)
+})
+
+test_that("find_global searches in the right places", {
+  testenv <- new.env(parent = globalenv())
+
+  # This should find the scale object in the package environment
+  expect_identical(find_global("scale_colour_hue", testenv),
+    ggplot2::scale_colour_hue)
+
+  # Set an object with the same name in the environment
+  testenv$scale_colour_hue <- "foo"
+
+  # Now it should return the new object
+  expect_identical(find_global("scale_colour_hue", testenv), "foo")
+
+  # If we search in the empty env, we should end up with the object
+  # from the ggplot2 namespace
+  expect_identical(find_global("scale_colour_hue", emptyenv()),
+    ggplot2::scale_colour_hue)
 })

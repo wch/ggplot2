@@ -1,7 +1,7 @@
 Package: ggplot2
 Type: Package
 Title: An implementation of the Grammar of Graphics
-Version: 0.9.2
+Version: 0.9.2.99
 Author: Hadley Wickham <h.wickham@gmail.com>, Winston Chang <winston@stdout.org>
 Maintainer: Hadley Wickham <h.wickham@gmail.com>
 Description: An implementation of the grammar of graphics
@@ -18,12 +18,12 @@ Depends:
     stats,
     methods
 Imports:
-    plyr (>= 1.0),
+    plyr (>= 1.7.1.99.1),
     digest,
     grid,
     gtable (>= 0.1.1),
     reshape2,
-    scales (>= 0.2.2),
+    scales (>= 0.2.2.99.1),
     proto,
     MASS
 Suggests:

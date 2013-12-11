@@ -57,7 +57,7 @@ print.theme <- function(x, ...) str(x)
 #' 
 #' \tabular{ll}{
 #'   line             \tab all line elements
-#'                    (\code{element_text}) \cr
+#'                    (\code{element_line}) \cr
 #'   rect             \tab all rectangluar elements
 #'                    (\code{element_rect}) \cr
 #'   text             \tab all text elements
@@ -124,9 +124,11 @@ print.theme <- function(x, ...) str(x)
 #'   legend.box       \tab arrangement of multiple legends
 #'                    ("horizontal" or "vertical") \cr
 #'
-#'   panel.background \tab background of plotting area
+#'   panel.background \tab background of plotting area, drawn underneath plot
 #'                    (\code{element_rect}; inherits from \code{rect}) \cr
-#'   panel.border     \tab border around plotting area
+#'   panel.border     \tab border around plotting area, drawn on top of plot
+#'                    so that it covers tick marks and grid lines. This should
+#'                    be used with \code{fill=NA}
 #'                    (\code{element_rect}; inherits from \code{rect}) \cr
 #'   panel.margin     \tab margin around facet panels
 #'                    (\code{unit}) \cr
@@ -150,7 +152,8 @@ print.theme <- function(x, ...) str(x)
 #'   plot.title       \tab plot title (text appearance)
 #'                    (\code{element_text}; inherits from \code{title}) \cr
 #'   plot.margin      \tab margin around entire plot
-#'                    (\code{unit}) \cr
+#'                    (\code{unit} with the sizes of the top, right, bottom, and
+#'                     left margins) \cr
 #'
 #'   strip.background \tab background of facet labels
 #'                    (\code{element_rect}; inherits from \code{rect}) \cr

@@ -1,4 +1,5 @@
 vcontext("themes")
+library(grid)
 
 p <- qplot(1:3, 1:3)
 
@@ -65,5 +66,12 @@ t <- theme_bw() + theme(text = element_blank())
 p + t
 save_vtest("text is element_blank - result is no text")
 
+
+# Testing specific elements
+p + theme(axis.text = element_blank(), axis.ticks = element_blank(),
+          axis.title = element_blank(), axis.ticks.margin = unit(0, "cm"),
+          plot.background = element_rect(fill = "lightblue"),
+          panel.border = element_rect(colour = "black", size = 4, fill = NA))
+save_vtest("many blank items, and light blue plot background")
 
 end_vcontext()

@@ -15,10 +15,6 @@ test_that("plot succeeds even if some computation fails", {
 })
 
 
-# For some reason, proto has to be loaded this way to access things
-# like $compute_aesthetics
-library(proto)
-
 # helper function for stat calc tests.
 test_stat <- function(stat) {
   stat$data <- transform(stat$data, PANEL = 1)
@@ -27,8 +23,29 @@ test_stat <- function(stat) {
   stat$calc_statistic(dat, NULL)
 }
 
+context("stat-bin")
+
+test_that("stat_sum", {
+  dat <- data.frame(x = c("a", "b", "c"), y = c(1, 5, 10))
+
+  # Should get a message when mapping/setting y and also using stat_bin
+  expect_message(p <- ggplot_build(ggplot(dat, aes(x=x, y=y)) + geom_bar()),
+    "Mapping a variable to y and also using stat=\"bin\"")
+  expect_message(p <- ggplot_build(ggplot(dat, aes(x=x, y=y)) + geom_bar(stat="bin")),
+    "Mapping a variable to y and also using stat=\"bin\"")
+
+  expect_message(p <- ggplot_build(ggplot(dat, aes(x=x)) + geom_bar(y=5)),
+    "Mapping a variable to y and also using stat=\"bin\"")
+
+  # This gives an error and a message (it would probably be OK if just one
+  # of these happened, but this test looks for both)
+  dat2 <- data.frame(x = c("a", "b", "c", "a", "b", "c"), y = c(1, 5, 10, 2, 3, 4))
+  expect_message(expect_error(
+    p <- ggplot_build(ggplot(dat2, aes(x=x, y=y)) + geom_bar())))
+})
+
+
 context("stat-sum")
-library(plyr)
 
 test_that("stat_sum", {
   d <- diamonds[1:1000, ]
