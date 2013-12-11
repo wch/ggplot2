@@ -307,13 +307,13 @@ build_strip <- function(panel, label_df, labeller, theme, side = "right") {
       strips <- gtable_add_rows(strips, unit(height_cm(title_grob), "cm"), pos = 0)
       strips <- gtable_add_grob(strips, title_grob, t=1, b=1, l=1, r=-1)
     }
-    strips <- gtable_add_col_space(strips, theme$panel.margin)
+    gtable_add_col_space(strips, theme$panel.margin)
   } else {
     if (!is.null(title_grob)) {
       strips <- gtable_add_cols(strips, unit(width_cm(title_grob), "cm"), pos = -1)
       strips <- gtable_add_grob(strips, title_grob, t=1, b=-1, l=-1, r=-1)
     }
-    strips <- gtable_add_row_space(strips, theme$panel.margin)
+    gtable_add_row_space(strips, theme$panel.margin)
   }
 }
 
