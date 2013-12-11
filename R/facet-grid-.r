@@ -277,10 +277,13 @@ build_strip <- function(panel, label_df, labeller, theme, side = "right") {
     labels[, i] <- labeller(names(label_df)[i], label_df[, i])
   }
   
+  title_labels <- labeller(names(label_df), NULL)
+
   # Render as grobs
   text_grobs <- apply(labels, c(1,2), striptext_grob, theme = theme,
     horizontal = horizontal)
-  title_grob <- striptitle_grob(names(label_df), horizontal, theme)
+  title_grob <- if (is.null(title_labels)) NULL else
+    striptitle_grob(title_labels, horizontal, theme)
   
   # Create layout
   name <- paste("strip", side, sep = "-")
@@ -300,13 +303,17 @@ build_strip <- function(panel, label_df, labeller, theme, side = "right") {
   strips <- gtable_matrix(name, text_grobs, heights = heights, widths = widths)
   
   if (horizontal) {
-    strips <- gtable_add_rows(strips, unit(height_cm(title_grob), "cm"), pos = 0)
-    strips <- gtable_add_grob(strips, title_grob, t=1, b=1, l=1, r=-1)
-    gtable_add_col_space(strips, theme$panel.margin)
+    if (!is.null(title_grob)) {
+      strips <- gtable_add_rows(strips, unit(height_cm(title_grob), "cm"), pos = 0)
+      strips <- gtable_add_grob(strips, title_grob, t=1, b=1, l=1, r=-1)
+    }
+    strips <- gtable_add_col_space(strips, theme$panel.margin)
   } else {
-    strips <- gtable_add_cols(strips, unit(width_cm(title_grob), "cm"), pos = -1)
-    strips <- gtable_add_grob(strips, title_grob, t=1, b=-1, l=-1, r=-1)
-    gtable_add_row_space(strips, theme$panel.margin)
+    if (!is.null(title_grob)) {
+      strips <- gtable_add_cols(strips, unit(width_cm(title_grob), "cm"), pos = -1)
+      strips <- gtable_add_grob(strips, title_grob, t=1, b=-1, l=-1, r=-1)
+    }
+    strips <- gtable_add_row_space(strips, theme$panel.margin)
   }
 }
 
