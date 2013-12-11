@@ -279,7 +279,7 @@ build_strip <- function(panel, label_df, labeller, theme, side = "right") {
   
   # Render as grobs
   text_grobs <- apply(labels, c(1,2), striptext_grob, theme = theme,
-    horizontal = horizontal, .drop = FALSE)
+    horizontal = horizontal)
   title_grob <- striptitle_grob(names(label_df), horizontal, theme)
   
   # Create layout
