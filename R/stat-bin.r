@@ -12,7 +12,7 @@
 #' @param origin Origin of first bin 
 #' @param width Width of bars when used with categorical data 
 #' @param right If \code{TRUE}, right-closed, left-open, if \code{FALSE}, 
-#"   the default, right-open, left-closed.
+#'   the default, right-open, left-closed.
 #' @param drop If TRUE, remove all bins with zero counts
 #' @return New data frame with additional columns:
 #'   \item{count}{number of points in bin}
@@ -24,10 +24,10 @@
 #' \donttest{
 #' simple <- data.frame(x = rep(1:10, each = 2))
 #' base <- ggplot(simple, aes(x))
-#' # By default, right = TRUE, and intervals are of the form (a, b]
-#' base + stat_bin(binwidth = 1, drop = FALSE, right = TRUE, col = "black")
-#' # If right = FALSE intervals are of the form [a, b)
+#' # By default, right = FALSE intervals are of the form [a, b)
 #' base + stat_bin(binwidth = 1, drop = FALSE, right = FALSE, col = "black")
+#' # If right = TRUE, and intervals are of the form (a, b]
+#' base + stat_bin(binwidth = 1, drop = FALSE, right = TRUE, col = "black")
 #' 
 #' m <- ggplot(movies, aes(x=rating))
 #' m + stat_bin()
@@ -57,12 +57,13 @@ StatBin <- proto(Stat, {
   calculate_groups <- function(., data, ...) {
     if (!is.null(data$y) || !is.null(match.call()$y)) {
       # Deprecate this behavior
-      message("Mapping a variable to y and also using stat=\"bin\".\n",
-        "  With stat=\"bin\", it will attempt to set the y value to the count of cases in each group.\n",
-        "  This can result in unexpected behavior and will not be allowed in a future version of ggplot2.\n",
-        "  If you want y to represent counts of cases, use stat=\"bin\" and don't map a variable to y.\n",
-        "  If you want y to represent values in the data, use stat=\"identity\".\n",
-        "  See ?geom_bar for examples.")
+      gg_dep("0.9.2", paste(sep = "\n",
+        "Mapping a variable to y and also using stat=\"bin\".",
+        "  With stat=\"bin\", it will attempt to set the y value to the count of cases in each group.",
+        "  This can result in unexpected behavior and will not be allowed in a future version of ggplot2.",
+        "  If you want y to represent counts of cases, use stat=\"bin\" and don't map a variable to y.",
+        "  If you want y to represent values in the data, use stat=\"identity\".",
+        "  See ?geom_bar for examples."))
     }
 
     .$informed <- FALSE
